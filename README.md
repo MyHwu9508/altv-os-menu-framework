@@ -150,8 +150,8 @@ This project is written by **[Kaniggel](https://github.com/MyHwu9508)** and publ
 ## Screenshot
 The screenshots have been taken from the example resource
 
-[Example1](https://i.imgur.com/xk8py4A.png)
-[Example2](https://i.imgur.com/1uKXtLS.png)
+![Example1](https://i.imgur.com/xk8py4A.png)
+![Example2](https://i.imgur.com/1uKXtLS.png)
 
 
 ## Help
