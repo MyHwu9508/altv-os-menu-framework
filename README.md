@@ -1,8 +1,7 @@
 # alt:V Open Source MenuFramework
----
 
 **[MenuFramework](https://github.com/MyHwu9508/altv-os-menu-framework)** is a menu framework written for **[alt:V](https://altv.mp/)**.
-This framework will help you implement intuitive menus quickly.
+This framework will help you implement intuitive menus quickly. Currently this framework is only available in JS. In case you want to help me adding TS support, please check the contact details on the bottom of this page.
 
 ## Features
 - Components (default items, list items, checkbox items, input items, confirm items)
@@ -27,9 +26,9 @@ npm run build
 After the command is executed you will see a `dist` folder containing all the resource files.
 Copy the content of this folder to your own resource, or if you are using the example resource paste the files in `menuframework-example/client/src/html`.
 
-## Menu usage?
-To run the example resource copy it into your servers `resources` folder and add `menuframework-example` to your `server.cfg`.
-Now start and join your server and press M to open the example resource.
+## Menu usage
+To run the example resource copy it into your servers resources folder and add `menuframework-example` to your `server.cfg`.
+Now start and join your server and `press M` to open the example resource.
 
 ## Menu Development
 ### Menu creation
@@ -54,19 +53,19 @@ Use one of the following examples to create a new menu item.
 new MenuFramework.MenuItem(text: string, description?: string, emoji?: string, disabled?: bool, data?: any, rightText?: string);
 
 /** CREATE A CONFIRM */
-new MenuFramework.ConfirmItem(text, confirmDenyText = 'No', confirmAcceptText = 'Yes', confirmed = false, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
+new MenuFramework.ConfirmItem(text: string, confirmDenyText?: string, confirmAcceptText?: string, confirmed?: bool, description?: string, emoji?: string, disabled:? bool, data?: any);
 
 /** CREATE A RANGESLIDER */
-new MenuFramework.RangeSliderItem(text, min, max, currentSelection = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
+new MenuFramework.RangeSliderItem(text: string, min: int, max: int, currentSelection?: int, description?: string, emoji?: string, disabled?: bool, data?: any);
 
 /** CREATE A CHECKBOX */
-new MenuFramework.CheckboxItem(text, checked = false, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
+new MenuFramework.CheckboxItem(text: string, checked?: bool, description?: string, emoji?: string, disabled?: bool, data?: any);
 
 /** CREATE A LIST */
-new MenuFramework.ListItem(text, values = [], initialIndex = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
+new MenuFramework.ListItem(text: string, values?: Array[], initialIndex?: int, description?: string, emoji?: string, disabled?: bool, data?: any);
 
 /** CREATE AN AUTOLIST */
-new MenuFramework.AutoListItem(text, min, max, initialIndex = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
+new MenuFramework.AutoListItem(text: string, min: int, max:int, initialIndex?: int, description?: string, emoji?: string, disabled?: bool, data?: any);
 ```
 ### Make sure you add the menu item you create to the menu!
 
@@ -151,8 +150,8 @@ This project is written by **[Kaniggel](https://github.com/MyHwu9508)** and publ
 ## Screenshot
 The screenshots have been taken from the example resource
 
-[Example1](https://imgur.com/xk8py4A)
-[Example2](https://imgur.com/1uKXtLS)
+[Example1](https://i.imgur.com/xk8py4A.png)
+[Example2](https://i.imgur.com/1uKXtLS.png)
 
 
 ## Help
