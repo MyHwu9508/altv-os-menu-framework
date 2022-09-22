@@ -1,0 +1,23 @@
+{
+    "name": "altv-os-menu-framework",
+    "private": false,
+    "license": "MIT",
+    "author": "Ronny Wendt <ronny.wendt@hotmail.com> <Kaniggel#7263> (https://corrosive.eu/)",
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@sveltejs/vite-plugin-svelte": "^1.0.2",
+        "svelte": "^3.49.0",
+        "vite": "^3.1.0",
+        "postcss": "^8.4.14",
+        "postcss-load-config": "^4.0.1",
+        "svelte-preprocess": "^4.10.7",
+        "autoprefixer": "^10.4.7",
+        "tailwindcss": "^3.1.5"
+    }
+}

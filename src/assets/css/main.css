@@ -1,0 +1,27 @@
+@font-face {
+	font-family: 'RobotoMono';
+	src: url('../fonts/RobotoMono.ttf') format('woff2');
+	font-weight: 100 1000;
+	font-stretch: 25% 151%;
+}
+
+@font-face {
+	font-family: 'Epilogue';
+	src: url('../fonts/Epilogue.ttf') format('woff2');
+	font-weight: 100 1000;
+	font-stretch: 25% 151%;
+}
+
+@font-face {
+	font-family: 'Quicksand';
+	src: url('../fonts/Quicksand.ttf') format('woff2');
+	font-weight: 100 1000;
+	font-stretch: 25% 151%;
+}
+
+@font-face {
+	font-family: 'Rubik';
+	src: url('../fonts/Rubik.ttf') format('woff2');
+	font-weight: 100 1000;
+	font-stretch: 25% 151%;
+}
