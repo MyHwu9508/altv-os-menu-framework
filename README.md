@@ -10,6 +10,8 @@ This framework will help you implement intuitive menus quickly. Currently this f
 - Support for emojis
 - Fully configurable design pattern (colours, scale, positioning)
 - Support for controllers and built in menu navigation using arrow keys, enter and backspace
+- all items, descriptions and menu titels can contain plain html markup language -> You could even add a video player to the description box if you want to
+- Colored text is support with the feature mentioned above. Please see the example resource to get help.
 
 ## Compile files
 **[MenuFramework](https://github.com/MyHwu9508/altv-os-menu-framework)** uses **[Svelte](https://svelte.dev/)**, **[Tailwind CSS](https://tailwindcss.com/)** with **[NodeJS](https://nodejs.org/en/)**.
