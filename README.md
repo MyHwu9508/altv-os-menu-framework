@@ -1,48 +1,161 @@
-# Svelte + Vite
+# alt:V Open Source MenuFramework
+---
 
-This template should help get you started developing with Svelte in Vite.
+**[MenuFramework](https://github.com/MyHwu9508/altv-os-menu-framework)** is a menu framework written for **[alt:V](https://altv.mp/)**.
+This framework will help you implement intuitive menus quickly.
 
-## Recommended IDE Setup
+## Features
+- Components (default items, list items, checkbox items, input items, confirm items)
+- Built-in event handlers
+- For each component an item description
+- Support for emojis
+- Fully configurable design pattern (colours, scale, positioning)
+- Support for controllers and built in menu navigation using arrow keys, enter and backspace
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## Compile files
+**[MenuFramework](https://github.com/MyHwu9508/altv-os-menu-framework)** uses **[Svelte](https://svelte.dev/)**, **[Tailwind CSS](https://tailwindcss.com/)** with **[NodeJS](https://nodejs.org/en/)**.
+Before compiling the files make sure you have the latest [Node.js](https://nodejs.org/en/) version installed.
+Run following commands to download all necessary dependencies:
+```sh
+npm i
+```
+Now you can build the source by running following command:
+```sh
+npm run build
+```
 
-## Need an official Svelte framework?
+After the command is executed you will see a `dist` folder containing all the resource files.
+Copy the content of this folder to your own resource, or if you are using the example resource paste the files in `menuframework-example/client/src/html`.
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## Menu usage?
+To run the example resource copy it into your servers `resources` folder and add `menuframework-example` to your `server.cfg`.
+Now start and join your server and press M to open the example resource.
 
-## Technical considerations
+## Menu Development
+### Menu creation
+Make sure you import the source file by adding following import to your file:
+```js
+import * as MenuFramework from './src/menu';
+```
 
-**Why use this over SvelteKit?**
+Create a menu by calling the **MenuFramework.Menu** constructor.
+```js
+const menu = new MenuFramework.Menu(title);
+```
+**Example:**
+```js
+const menu = new MenuFramework.Menu('Example');
+```
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-  `vite dev` and `vite build` wouldn't work in a SvelteKit environment, for example.
+### Menu item creation
+Use one of the following examples to create a new menu item.
+```js
+/** CREATE A BUTTON */
+new MenuFramework.MenuItem(text: string, description?: string, emoji?: string, disabled?: bool, data?: any, rightText?: string);
 
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+/** CREATE A CONFIRM */
+new MenuFramework.ConfirmItem(text, confirmDenyText = 'No', confirmAcceptText = 'Yes', confirmed = false, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+/** CREATE A RANGESLIDER */
+new MenuFramework.RangeSliderItem(text, min, max, currentSelection = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+/** CREATE A CHECKBOX */
+new MenuFramework.CheckboxItem(text, checked = false, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+/** CREATE A LIST */
+new MenuFramework.ListItem(text, values = [], initialIndex = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
 
-**Why include `.vscode/extensions.json`?**
+/** CREATE AN AUTOLIST */
+new MenuFramework.AutoListItem(text, min, max, initialIndex = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined);
+```
+### Make sure you add the menu item you create to the menu!
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+### Events
+You can listen to events that are emitted by user inputs.
 
-**Why enable `checkJs` in the JS template?**
-
-It is likely that most cases of changing variable types in runtime are likely to be accidental, rather than deliberate. This provides advanced typechecking out of the box. Should you like to take advantage of the dynamically-typed nature of JavaScript, it is trivial to change the configuration.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+Listen to an event by adding a handler:
+```js
+    menu.itemSelect.on((item,index) => {
+        alt.log(`Selected item ${item.text} @${index}`);
+    });
+```
 
 ```js
-// store.js
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+/** AVAILBALE EVENTS */
+menuOpen()
+menuClose(noParentMenuOpened)
+checkboxChange(item,state)
+rangeSliderChange(item,newValue)
+itemSelect(item,index)
+confirmationSubmit(item,confirmed)
+inputSubmit(item,newValue)
+inputChange(item,newValue)
+listChange(item,newIndex,oldIndex,newValue)
+autoListChange(item,newIndex,newValue)
 ```
+
+### Design Configuration
+Menus can be designed in bundles as follows:
+Change the values for `MenuFramework.menuConfiguration`
+It contains following attributes:
+```js
+left
+top
+height
+fontSize
+highlightColor
+backgroundColor
+fontColor
+fontWeight
+fontType
+sound
+```
+If you want to add more fonts to the menu, please check the `main.css` in `src/assets/css`
+
+### Metas
+The menu is using metas that you can use in any resource to process information you may need
+1. You can disable any menu input by giving the local player follwing meta
+```
+MenuFramework::State::PreventInput
+```
+2. While the player is hovering over an input item, it will get focused and the game controls disabled. Also it will set following meta to true
+```
+MenuFramework::Action::IsTypingText
+```
+
+### Functions
+To get the most recent used Menu use `MenuFramework.Menu.current`
+
+Menu functions:
+```js
+addItem(item)
+removeItem(item)
+addSubmenu(subMenu,item)
+removeSubmenu(item)
+clear()
+open()
+close()
+```
+Menu variables you can set:
+```js
+visible: bool
+title: string
+currentIndex: int
+```
+
+To manipulate menu items after creation check the attributes from the constructors above. Any attribute can be changed during runtime and will be applied to the item
+
+## License
+This project is written by **[Kaniggel](https://github.com/MyHwu9508)** and published under **MIT License**
+
+## Screenshot
+The screenshots have been taken from the example resource
+
+[Example1](https://imgur.com/xk8py4A)
+[Example2](https://imgur.com/1uKXtLS)
+
+
+## Help
+In case you have any questions or concerns regarding this, feel free to contact me on Discord.
+### Kaniggel#7263
+Alternatively you can join my Discord and create a ticket: https://corrosive.eu/discord
