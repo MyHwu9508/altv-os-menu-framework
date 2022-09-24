@@ -169,9 +169,9 @@ To manipulate menu items after creation check the attributes from the constructo
 
 ## Screenshots
 The screenshots have been taken from the example resource
-Example1 | Example2
+Example1 | Example2 | Example3
 :-------|:--------
-![Example1](https://i.imgur.com/HRvpqLK.png) | ![Example2](https://i.imgur.com/dfcdXQR.png5)
+![Example1](https://i.imgur.com/HRvpqLK.png) | ![Example2](https://i.imgur.com/dfcdXQR.png5) | ![Example3](https://i.imgur.com/VUCRcOf.png)
 
 ## Help
 In case you have any questions or concerns regarding this, feel free to contact me on Discord.
