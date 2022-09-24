@@ -1,5 +1,4 @@
 # alt:V Open Source MenuFramework
-
 **[MenuFramework](https://github.com/MyHwu9508/altv-os-menu-framework)** is a menu framework written for **[alt:V](https://altv.mp/)**.
 This framework will help you implement intuitive menus quickly. Currently this framework is only available in JS. In case you want to help me adding TS support, please check the contact details on the bottom of this page.
 
@@ -11,14 +10,14 @@ This framework will help you implement intuitive menus quickly. Currently this f
 - Fully configurable design pattern (colours, scale, positioning)
 - Support for controllers and built in menu navigation using arrow keys, enter and backspace
 - all items, descriptions and menu titels can contain plain html markup language -> You could even add a video player to the description box if you want to
-- Colored text is support with the feature mentioned above. Please see the example resource to get help.
+- Colored text is supported with the feature mentioned above. Please see the example resource to get help.
 
 ## Compile files
 **[MenuFramework](https://github.com/MyHwu9508/altv-os-menu-framework)** uses **[Svelte](https://svelte.dev/)**, **[Tailwind CSS](https://tailwindcss.com/)** with **[NodeJS](https://nodejs.org/en/)**.
 Before compiling the files make sure you have the latest [Node.js](https://nodejs.org/en/) version installed.
 Run following commands to download all necessary dependencies:
 ```sh
-npm i
+npm install
 ```
 Now you can build the source by running following command:
 ```sh
@@ -51,27 +50,44 @@ const menu = new MenuFramework.Menu('Example');
 ### Menu item creation
 Use one of the following examples to create a new menu item.
 ```js
-/** CREATE A BUTTON */
+// CREATE A BUTTON
 new MenuFramework.MenuItem(text: string, description?: string, emoji?: string, disabled?: bool, data?: any, rightText?: string);
 
-/** CREATE A CONFIRM */
+//CREATE A CONFIRM
 new MenuFramework.ConfirmItem(text: string, confirmDenyText?: string, confirmAcceptText?: string, confirmed?: bool, description?: string, emoji?: string, disabled:? bool, data?: any);
 
-/** CREATE A RANGESLIDER */
+//CREATE A RANGESLIDER
 new MenuFramework.RangeSliderItem(text: string, min: int, max: int, currentSelection?: int, description?: string, emoji?: string, disabled?: bool, data?: any);
 
-/** CREATE A CHECKBOX */
+//CREATE A CHECKBOX
 new MenuFramework.CheckboxItem(text: string, checked?: bool, description?: string, emoji?: string, disabled?: bool, data?: any);
 
-/** CREATE A LIST */
+//CREATE A LIST
 new MenuFramework.ListItem(text: string, values?: Array[], initialIndex?: int, description?: string, emoji?: string, disabled?: bool, data?: any);
 
-/** CREATE AN AUTOLIST */
+//CREATE AN AUTOLIST
 new MenuFramework.AutoListItem(text: string, min: int, max:int, initialIndex?: int, description?: string, emoji?: string, disabled?: bool, data?: any);
-/** CREATE AN INPUT */
+//CREATE AN INPUT
 new MenuFramework.InputItem(text: string, maxLength?: int, placeholder?: string, value?: any, description?: string, emoji?: string, disabled?: bool, data?: any);
 ```
-### Make sure you add the menu item you create to the menu!
+**Example:**
+```js
+const menu = new MenuFramework.Menu('Menu');
+const item = new MenuFramework.MenuItem('Hello World');
+menu.addItem(item);
+
+//Or in shorthand version
+const menu = new MenuFramework.Menu('Menu');
+menu.addItem(new MenuFramework.MenuItem('Hello World');
+```
+
+### Important notice to menu items!
+Items can be shared across multiple menus.
+To change attributes of the menu item use the setters and getters, **not** the variables starting with `_`
+You need to add items to a menu, so you can interact with it.
+```js
+menu.addItem(item);
+```
 
 ### Events
 You can listen to events that are emitted by user inputs.
@@ -82,19 +98,20 @@ Listen to an event by adding a handler:
         alt.log(`Selected item ${item.text} @${index}`);
     });
 ```
-
+**AVAILBALE EVENTS**
 ```js
-/** AVAILBALE EVENTS */
-menuOpen()
-menuClose(noParentMenuOpened)
-checkboxChange(item,state)
-rangeSliderChange(item,newValue)
-itemSelect(item,index)
-confirmationSubmit(item,confirmed)
-inputSubmit(item,newValue)
-inputChange(item,newValue)
-listChange(item,newIndex,oldIndex,newValue)
-autoListChange(item,newIndex,newValue)
+menuOpen() //Called on menu open
+menuClose(noParentMenuOpened) // called on menu close
+checkboxChange(item,state) //called on checkbox change
+rangeSliderChange(item,newValue) //called on range slider change
+itemSelect(item,index) // called when selecting an item
+confirmationSubmit(item,confirmed) //called when selecting an confirmation item
+confirmationChange(item,confirmed) //called when confirmation item changes
+inputSubmit(item,newValue) //called when selecting an input item
+inputChange(item,newValue) //called when typing into an input item
+listChange(item,newIndex,oldIndex,newValue) //called when the list value changed (left arrow, right arrow)
+autoListChange(item,newIndex,newValue) //called when the auto list changes (left arrow, right arrow)
+indexChange(item,newIndex) //called when the current selected item changes (arrow up, arrow down)
 ```
 
 ### Design Configuration
@@ -132,6 +149,7 @@ To get the most recent used Menu use `MenuFramework.Menu.current`
 Menu functions:
 ```js
 addItem(item)
+hasItem(item)
 removeItem(item)
 addSubmenu(subMenu,item)
 removeSubmenu(item)
@@ -148,17 +166,16 @@ currentIndex: int
 
 To manipulate menu items after creation check the attributes from the constructors above. Any attribute can be changed during runtime and will be applied to the item
 
-## License
-This project is written by **[Kaniggel](https://github.com/MyHwu9508)** and published under **MIT License**
-
-## Screenshot
+## Screenshots
 The screenshots have been taken from the example resource
-
-![Example1](https://i.imgur.com/xk8py4A.png)
-![Example2](https://i.imgur.com/1uKXtLS.png)
-
+Example1 | Example2
+:-------|:--------
+![Example1](https://i.imgur.com/HRvpqLK.png) | ![Example2](https://i.imgur.com/dfcdXQR.png5)
 
 ## Help
 In case you have any questions or concerns regarding this, feel free to contact me on Discord.
-### Kaniggel#7263
+**Kaniggel#7263**
 Alternatively you can join my Discord and create a ticket: https://corrosive.eu/discord
+
+## License
+This project is written by **[Kaniggel](https://github.com/MyHwu9508)** and published under **MIT License**
