@@ -3,7 +3,7 @@ import * as native from 'natives';
 
 export let viewReady = false;
 const debug = false; //setting this to true will print some logs to debug functions
-const webView = new alt.WebView('http://resource/client/src/html/index.html'); //http://localhost:5173   http://resource/client/menu/src/html/index.html
+const webView = new alt.WebView('http://resource/client/menu/src/html/index.html'); //http://localhost:5173   http://resource/client/menu/src/html/index.html
 
 //For developers
 const cleanSubmenus = false; // When set to true it will try to delete all submenus and items attached to an item you are deleting. However this may break dynamic menus
@@ -70,14 +70,14 @@ export class Menu {
         }
         if (state) {
             if(!justNavigatedBack)playSound('SELECT');
+            this.menuOpen.emit(); //emit Open before we actually open the menu -> When changing items in MenuOpen they wont get sent to UI twice
             webView.emit('setMenuItems', []); //When opening large menus use this to pre-open the menu before the items are loaded to prevent confusion
             webView.emit('setTitle', this._title);
             webView.emit('setVisible', true);
             this.refreshItems();
-            if(this.currentIndex >= this._items.length) this._currentIndex = 0; //reset index when it became out of bounce
+            if(this.currentIndex >= this._items.length) this.currentIndex = 0;  //reset index when it became out of bounce
             webView.emit('setIndex', this.currentIndex); //refresh current index when opening
             Menu.current = this;
-            this.menuOpen.emit();
         } else {
             playSound('Back');
             webView.emit('setVisible', false);
@@ -168,12 +168,15 @@ export class Menu {
             childMenu.clear();
         }
         item = null;
+
+        if(this.currentIndex >= this._items.length) this.currentIndex = 0;  //reset index when it became out of bounce
     }
 
     clear() {
         for (let i = this._items.length - 1; i >= 0; i--){
             this.removeItem(this._items[i],true);
         }
+        this.currentIndex = 0;
         this._items = [];
         this.refreshItems();
     }
@@ -205,7 +208,7 @@ export class Menu {
             const index = this._items.indexOf(item);
             if (index != -1) {
                 webView.emit('setMenuItem', this._items[index], index);
-                webView.emit('setIndex', this.currentIndex); //enfore also refresh of the index to fix focus and or description - Important!
+   //  MAYBE NOT NEEDED??? webView.emit('setIndex', this.currentIndex); //enforece index update -> refreshes description and input items
             } else {
                 alt.log('editing item, that is not in this menu?');
             }
@@ -628,6 +631,7 @@ export class ListItem extends MenuItem {
         const oldIndex = this.selectedIndex;
         if (this.selectedIndex - 1 < 0) this.selectedIndex = this.values.length - 1;
         else this.selectedIndex--;
+        if(oldIndex === this.selectedIndex)return false; // no emit when nothing changed
         if (!isAutoListItem) Menu.current.listChange.emit(this, this.selectedIndex, oldIndex, this.currentValue);
         return true;
     }
@@ -637,6 +641,7 @@ export class ListItem extends MenuItem {
         const oldIndex = this.selectedIndex;
         if (this.selectedIndex >= this.values.length - 1) this.selectedIndex = 0;
         else this.selectedIndex++;
+        if(oldIndex === this.selectedIndex)return false; // no emit when nothing changed
         if (!isAutoListItem) Menu.current.listChange.emit(this, this.selectedIndex, oldIndex, this.currentValue);
         return true;
     }

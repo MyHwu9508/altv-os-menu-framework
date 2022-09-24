@@ -129,7 +129,6 @@ function subMenuBenchmark(){
 
 
 alt.on('keydown', (key) => {
-    return;
     switch (key) {
         //M
         case 0x4D:

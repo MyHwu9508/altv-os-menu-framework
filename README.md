@@ -101,7 +101,7 @@ Listen to an event by adding a handler:
 ```
 **AVAILBALE EVENTS**
 ```js
-menuOpen() //Called on menu open
+menuOpen() //Called on menu open -> called BEFORE the menu is actually opened and sent to the webView, so if you do changes on each menu open, it won't cause lags
 menuClose(noParentMenuOpened) // called on menu close
 checkboxChange(item,state) //called on checkbox change
 rangeSliderChange(item,newValue) //called on range slider change
