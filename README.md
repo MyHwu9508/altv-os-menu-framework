@@ -67,6 +67,7 @@ new MenuFramework.ListItem(text: string, values?: Array[], initialIndex?: int, d
 
 //CREATE AN AUTOLIST
 new MenuFramework.AutoListItem(text: string, min: int, max:int, initialIndex?: int, description?: string, emoji?: string, disabled?: bool, data?: any);
+
 //CREATE AN INPUT
 new MenuFramework.InputItem(text: string, maxLength?: int, placeholder?: string, value?: any, description?: string, emoji?: string, disabled?: bool, data?: any);
 ```

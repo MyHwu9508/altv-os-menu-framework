@@ -38,6 +38,14 @@ function BuildMenu(){
     menu.addItem(new MenuFramework.InputItem('Username',7,'','','We also have input items with listeners for any input change, or submit'));
     menu.addItem(new MenuFramework.InputItem('Username',7,'','test','We also have input items with listeners for any input change, or submit'));
 
+
+    menu.confirmationChange.on((item,state)=>{
+        alt.log(`changed confirmation state from ${item.text} to ${state}`);
+    });
+    menu.confirmationSubmit.on((item, state)=>{
+        alt.log(`confirmation submit ${item.text} with state ${state}`);
+    });
+
 }
 
 function subMenuConfiguration(){
@@ -121,12 +129,11 @@ function subMenuBenchmark(){
 
 
 alt.on('keydown', (key) => {
+    return;
     switch (key) {
         //M
         case 0x4D:
             MenuFramework.Menu.current.visible = !MenuFramework.Menu.current.visible;
-            if (MenuFramework.Menu.current.visible) MenuFramework.playSound('SELECT');
-            else MenuFramework.playSound('Back');
             break;
     }
 });

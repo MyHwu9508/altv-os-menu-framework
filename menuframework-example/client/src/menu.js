@@ -3,13 +3,13 @@ import * as native from 'natives';
 
 export let viewReady = false;
 const debug = false; //setting this to true will print some logs to debug functions
-const webView = new alt.WebView('http://resource/client/src/html/index.html'); //http://localhost:5173   http://resource/client/menu/src/html/index.html
+const webView = new alt.WebView('http://resource/client/menu/src/html/index.html'); //http://localhost:5173   http://resource/client/menu/src/html/index.html
 
 //For developers
 const cleanSubmenus = false; // When set to true it will try to delete all submenus and items attached to an item you are deleting. However this may break dynamic menus
 const resetMenuCurrent = false; //When set to true this will toggle to set Menu.current to undefined when no menu is open. When turning the Menu.current variable will be set to undefined when you close all menus and there is no one visible
 
-let lastNavigation = 0, keydownStart, disableGameControls;
+let lastNavigation = 0, keydownStart, disableGameControls,justNavigatedBack;
 
 webView.once('ready', () => {
 
@@ -26,108 +26,6 @@ webView.once('ready', () => {
         }
     });
 });
-
-export class MenuConfiguration {
-    _left = 1;
-    _top = 1;
-    _height = 30;
-    _width = 20;
-    _fontSize = 20;
-    _highlightColor = '#bf7595da';
-    _backgroundColor = '#000000a6';
-    _fontColor = '#dfdfbb';
-    _fontWeight = 500;
-    _fontType = 'Rubik';
-    _sound = true;
-
-    get left() {
-        return this._left;
-    }
-    set left(value) {
-        this._left = value;
-        webView.emit('setConfig', 'left', value);
-    }
-
-    get top() {
-        return this._top;
-    }
-    set top(value) {
-        this._top = value;
-        webView.emit('setConfig', 'top', value);
-    }
-
-    get height() {
-        return this._height;
-    }
-    set height(value) {
-        this._height = value;
-        webView.emit('setConfig', 'height', value);
-    }
-
-    get width() {
-        return this._width;
-    }
-    set width(value) {
-        this._width = value;
-        webView.emit('setConfig', 'width', value);
-    }
-
-    get fontSize() {
-        return this._fontSize;
-    }
-    set fontSize(value) {
-        this._fontSize = value;
-        webView.emit('setConfig', 'fontSize', value);
-    }
-
-    get highlightColor() {
-        return this._highlightColor;
-    }
-    set highlightColor(value) {
-        this._highlightColor = value;
-        webView.emit('setConfig', 'highlightColor', value);
-    }
-
-    get backgroundColor() {
-        return this._backgroundColor;
-    }
-    set backgroundColor(value) {
-        this._backgroundColor = value;
-        webView.emit('setConfig', 'backgroundColor', value);
-    }
-
-    get fontColor() {
-        return this._fontColor;
-    }
-    set fontColor(value) {
-        this._fontColor = value;
-        webView.emit('setConfig', 'fontColor', value);
-    }
-
-    get fontWeight() {
-        return this._fontWeight;
-    }
-    set fontWeight(value) {
-        this._fontWeight = value;
-        webView.emit('setConfig', 'fontWeight', value);
-    }
-
-    get fontType() {
-        return this._fontType;
-    }
-    set fontType(value) {
-        this._fontType = value;
-        webView.emit('setConfig', 'fontType', value);
-    }
-
-    get sound(){
-        return this._sound;
-    }
-    set sound(state){
-        this._sound = state;
-    }
-}
-export const menuConfiguration = new MenuConfiguration();
 
 export class Menu {
     static current;
@@ -159,6 +57,8 @@ export class Menu {
         this.inputChange = new EventHandler();
         this.listChange = new EventHandler();
         this.autoListChange = new EventHandler();
+        this.confirmationChange = new EventHandler();
+        this.indexChange = new EventHandler();
     }
     get visible() {
         return this._visible;
@@ -169,6 +69,7 @@ export class Menu {
             alt.log('set visible: ' + state);
         }
         if (state) {
+            if(!justNavigatedBack)playSound('SELECT');
             webView.emit('setMenuItems', []); //When opening large menus use this to pre-open the menu before the items are loaded to prevent confusion
             webView.emit('setTitle', this._title);
             webView.emit('setVisible', true);
@@ -178,6 +79,7 @@ export class Menu {
             Menu.current = this;
             this.menuOpen.emit();
         } else {
+            playSound('Back');
             webView.emit('setVisible', false);
             if(resetMenuCurrent) Menu.current = undefined;
             this.menuClose.emit(false);
@@ -234,6 +136,10 @@ export class Menu {
         if (this.visible) {
             webView.emit('addMenuItem', item);
         }
+    }
+
+    hasItem(item) {
+        return this._items.includes(item);
     }
 
     removeItem(item,onlyCleanup = false) {
@@ -315,6 +221,11 @@ export class Menu {
         if (this.currentItem() instanceof InputItem) return false;
 
         if (this._parentMenu) {
+            //Handle menu back sounds
+            justNavigatedBack = true;
+            alt.nextTick(()=>{justNavigatedBack = false});
+            playSound('Back');
+
             this._visible = false;
             this._parentMenu.visible = true;
         }
@@ -335,7 +246,8 @@ export class Menu {
             return false;
         }
         else{
-            return this.goBack();
+            this.goBack()
+            return false;
         }
     }
     moveRight() {
@@ -349,7 +261,9 @@ export class Menu {
             return false;
         }
         else{
-            return this.select();
+            const resSelect = this.select();
+            if(resSelect) playSound('SELECT');
+            return false;
         }
     }
     moveUp() {
@@ -384,6 +298,8 @@ export class Menu {
             webView.unfocus();
             disableGameControls = false;
         }
+
+        this.indexChange.emit(this,this.currentIndex);
     }
 
     select() {
@@ -510,6 +426,7 @@ export class MenuItem {
             }
             Menu.current._visible = false;
             childMenu.visible = true;
+            return false; // prevent sound playing twice
         }
         return true;
     }
@@ -564,6 +481,7 @@ export class ConfirmItem extends MenuItem {
     set confirmed(state) {
         this._confirmed = state;
         this.requestRefresh();
+        Menu.current.confirmationChange.emit(this,state);
     }
 
     select() {
@@ -825,6 +743,108 @@ export class RangeSliderItem extends MenuItem {
 
 }
 
+export class MenuConfiguration {
+    _left = 1;
+    _top = 1;
+    _height = 30;
+    _width = 20;
+    _fontSize = 20;
+    _highlightColor = '#bf7595da';
+    _backgroundColor = '#000000a6';
+    _fontColor = '#dfdfbb';
+    _fontWeight = 500;
+    _fontType = 'Rubik';
+    _sound = true;
+
+    get left() {
+        return this._left;
+    }
+    set left(value) {
+        this._left = value;
+        webView.emit('setConfig', 'left', value);
+    }
+
+    get top() {
+        return this._top;
+    }
+    set top(value) {
+        this._top = value;
+        webView.emit('setConfig', 'top', value);
+    }
+
+    get height() {
+        return this._height;
+    }
+    set height(value) {
+        this._height = value;
+        webView.emit('setConfig', 'height', value);
+    }
+
+    get width() {
+        return this._width;
+    }
+    set width(value) {
+        this._width = value;
+        webView.emit('setConfig', 'width', value);
+    }
+
+    get fontSize() {
+        return this._fontSize;
+    }
+    set fontSize(value) {
+        this._fontSize = value;
+        webView.emit('setConfig', 'fontSize', value);
+    }
+
+    get highlightColor() {
+        return this._highlightColor;
+    }
+    set highlightColor(value) {
+        this._highlightColor = value;
+        webView.emit('setConfig', 'highlightColor', value);
+    }
+
+    get backgroundColor() {
+        return this._backgroundColor;
+    }
+    set backgroundColor(value) {
+        this._backgroundColor = value;
+        webView.emit('setConfig', 'backgroundColor', value);
+    }
+
+    get fontColor() {
+        return this._fontColor;
+    }
+    set fontColor(value) {
+        this._fontColor = value;
+        webView.emit('setConfig', 'fontColor', value);
+    }
+
+    get fontWeight() {
+        return this._fontWeight;
+    }
+    set fontWeight(value) {
+        this._fontWeight = value;
+        webView.emit('setConfig', 'fontWeight', value);
+    }
+
+    get fontType() {
+        return this._fontType;
+    }
+    set fontType(value) {
+        this._fontType = value;
+        webView.emit('setConfig', 'fontType', value);
+    }
+
+    get sound(){
+        return this._sound;
+    }
+    set sound(state){
+        this._sound = state;
+    }
+}
+export const menuConfiguration = new MenuConfiguration();
+
 class EventHandler {
     constructor() {
         this.handlers = [];
@@ -857,7 +877,8 @@ function registerKeybinds() {
         }
 
         if (native.isControlJustPressed(0, 177)) {
-            if (menu.goBack()) playSound('BACK');
+            //if (menu.goBack()) playSound('BACK');
+            menu.goBack()
             return;
         }
 
