@@ -3,7 +3,7 @@ import * as native from 'natives';
 
 export let viewReady = false;
 const debug = false; //setting this to true will print some logs to debug functions
-const webView = new alt.WebView('http://resource/client/menu/src/html/index.html'); //http://localhost:5173   http://resource/client/menu/src/html/index.html
+const webView = new alt.WebView('http://resource/client/src/html/index.html'); //http://localhost:5173   http://resource/client/menu/src/html/index.html
 
 //For developers
 const cleanSubmenus = false; // When set to true it will try to delete all submenus and items attached to an item you are deleting. However this may break dynamic menus
