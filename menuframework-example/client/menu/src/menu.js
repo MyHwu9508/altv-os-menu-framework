@@ -6,7 +6,7 @@ const debug = false; //setting this to true will print some logs to debug functi
 const webView = new alt.WebView('http://resource/client/menu/src/html/index.html'); //http://localhost:5173   http://resource/client/menu/src/html/index.html
 
 //For developers
-const cleanSubmenus = false; // When set to true it will try to delete all submenus and items attached to an item you are deleting. However this may break dynamic menus
+const cleanSubmenus = true; // When set to true it will try to delete all submenus and items attached to an item you are deleting. However this may break dynamic menus
 const resetMenuCurrent = false; //When set to true this will toggle to set Menu.current to undefined when no menu is open. When turning the Menu.current variable will be set to undefined when you close all menus and there is no one visible
 
 let lastNavigation = 0, keydownStart, disableGameControls,justNavigatedBack;
@@ -64,19 +64,27 @@ export class Menu {
         return this._visible;
     }
     set visible(state) {
-        this._visible = state;
         if (debug) {
             alt.log('set visible: ' + state);
         }
         if (state) {
             if(!justNavigatedBack)playSound('SELECT');
             this.menuOpen.emit(); //emit Open before we actually open the menu -> When changing items in MenuOpen they wont get sent to UI twice
+            if(this.currentIndex >= this._items.length) this._currentIndex = 0;  //reset index when it became out of bounce
             webView.emit('setMenuItems', []); //When opening large menus use this to pre-open the menu before the items are loaded to prevent confusion
             webView.emit('setTitle', this._title);
             webView.emit('setVisible', true);
-            this.refreshItems();
-            if(this.currentIndex >= this._items.length) this.currentIndex = 0;  //reset index when it became out of bounce
+            webView.emit('setMenuItems', this._items); //force refresh of items, using this instead of refreshItems(), because we set visible to true in the end to prevent currentIndex out of bounce in webView, when changing menus on menuOpen (Needs investigation!)
             webView.emit('setIndex', this.currentIndex); //refresh current index when opening
+
+            /*
+            //enfore only one menu opened at a time
+            if (this !== Menu.current && Menu.current.visible) {
+                Menu.current._visible = false;
+                Menu.current.menuClose.emit(false);
+            }
+            */
+
             Menu.current = this;
         } else {
             playSound('Back');
@@ -84,6 +92,7 @@ export class Menu {
             if(resetMenuCurrent) Menu.current = undefined;
             this.menuClose.emit(false);
         }
+        this._visible = state;
     }
 
     get title() {
@@ -120,14 +129,13 @@ export class Menu {
     }
 
 
-    //needs rework?
     removeSubmenu(item) {
         if (debug) {
             alt.log('removing submenu');
         }
         if (item._childMenu) {
-            item._childMenu._parentMenu = undefined;
-            item.childMenu = undefined;
+            Menu.remove(Menu._allMenus[item._childMenu]);
+            this.removeItem(item);
         }
     }
 
@@ -154,7 +162,6 @@ export class Menu {
             if (this.visible) {
                 webView.emit('removeMenuItem', index);
             }
-            if(this.currentIndex >= this._items.length) this.currentIndex = 0; //reset index when it became out of bounce
         }
 
         //Cleanup list, when items gets removed
@@ -165,11 +172,11 @@ export class Menu {
         
         if(cleanSubmenus && item._childMenu){
             const childMenu = Menu._allMenus[item._childMenu];
-            childMenu.clear();
+            Menu.remove(childMenu);
         }
         item = null;
 
-        if(this.currentIndex >= this._items.length) this.currentIndex = 0;  //reset index when it became out of bounce
+        if(this.currentIndex >= this._items.length) this.currentIndex = 0; //reset index when it became out of bounce
     }
 
     clear() {
@@ -187,6 +194,8 @@ export class Menu {
             alt.log('tried to remove non-existend menu!');
             return;
         }
+        if(Menu.current === menu && menu.visible) menu.visible = false;
+        menu.clear();
         Menu._allMenus.splice(index, 1);
         menu = null;
     }
@@ -214,14 +223,11 @@ export class Menu {
             }
         }
     }
-    currentItem() {
-        const currentItem = this._items[this.currentIndex];
-        if (!currentItem) return false;
-        return currentItem;
+    get currentItem() {
+        return this._items[this.currentIndex] ?? false;
     }
-
     goBack() {
-        if (this.currentItem() instanceof InputItem) return false;
+        if (this.currentItem instanceof InputItem) return false;
 
         if (this._parentMenu) {
             //Handle menu back sounds
@@ -231,6 +237,7 @@ export class Menu {
 
             this._visible = false;
             this._parentMenu.visible = true;
+            this.menuClose.emit(false);
         }
         else {
             this.visible = false;
@@ -239,7 +246,7 @@ export class Menu {
         return true;
     }
     moveLeft() {
-        const currentItem = this.currentItem();
+        const currentItem = this.currentItem;
         if (!currentItem) return false;
 
         if(currentItem instanceof ListItem || currentItem instanceof RangeSliderItem || currentItem instanceof ConfirmItem){
@@ -254,7 +261,7 @@ export class Menu {
         }
     }
     moveRight() {
-        const currentItem = this.currentItem();
+        const currentItem = this.currentItem;
         if (!currentItem) return false;
 
         if(currentItem instanceof ListItem || currentItem instanceof RangeSliderItem || currentItem instanceof ConfirmItem){
@@ -289,7 +296,7 @@ export class Menu {
 
     //When selected item index changes due to moving up, down or navigating in menus
     onIndexChange() {
-        const currentItem = this.currentItem();
+        const currentItem = this.currentItem;
         if (!currentItem) return false;
 
         if (currentItem instanceof InputItem && !currentItem.disabled) {
@@ -306,7 +313,7 @@ export class Menu {
     }
 
     select() {
-        const currentItem = this.currentItem();
+        const currentItem = this.currentItem;
         if (!currentItem) return false;
 
         const res = currentItem.select();
@@ -428,6 +435,7 @@ export class MenuItem {
                 return false;
             }
             Menu.current._visible = false;
+            Menu.current.menuClose.emit(false);
             childMenu.visible = true;
             return false; // prevent sound playing twice
         }
@@ -914,12 +922,7 @@ function registerKeybinds() {
         if (keydownStart + 1000 < now) itemChangeSpeed = 70;
         if (keydownStart + 3000 < now) itemChangeSpeed = 50;
         if (keydownStart + 5000 < now) itemChangeSpeed = 30;
-        if (keydownStart + 7000 < now){
-            itemChangeSpeed = 100;
-            alt.nextTick(()=>{
-                itemChangeSpeed = 15;   
-            });
-        }
+        if (keydownStart + 7000 < now) itemChangeSpeed = 100;
 
 
         if ((native.isControlPressed(0, 172) || native.isDisabledControlPressed(0, 172)) && lastNavigation + itemChangeSpeed < now) {
