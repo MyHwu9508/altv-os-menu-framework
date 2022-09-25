@@ -77,13 +77,12 @@ export class Menu {
             webView.emit('setMenuItems', this._items); //force refresh of items, using this instead of refreshItems(), because we set visible to true in the end to prevent currentIndex out of bounce in webView, when changing menus on menuOpen (Needs investigation!)
             webView.emit('setIndex', this.currentIndex); //refresh current index when opening
 
-            /*
-            //enfore only one menu opened at a time
+            
+            //enfore only one menu opened at a time / fired when a user hardcodes .visible = true
             if (this !== Menu.current && Menu.current.visible) {
                 Menu.current._visible = false;
                 Menu.current.menuClose.emit(false);
             }
-            */
 
             Menu.current = this;
         } else {
