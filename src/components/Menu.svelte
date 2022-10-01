@@ -1,4 +1,5 @@
 <script>
+import { fly } from 'svelte/transition';
 import { onMount,onDestroy } from "svelte";
 import MenuItem from './MenuItem.svelte';
 import RangeSliderItem from "./RangeSliderItem.svelte";
@@ -30,6 +31,7 @@ import InputItem from './InputItem.svelte';
     let fontColor = '#dfdfda';
     let fontWeight = 500;
     let fontType = 'Rubik';
+    let useAnimations = true;
 
     onDestroy(()=>{
         if(debuginterval){
@@ -54,7 +56,7 @@ import InputItem from './InputItem.svelte';
             title = 'DEBUG';
             description = 'DEBUG';
             visible = true;
-            items.push({_type:'RangeSliderItem',_text:'1'});
+            items.push({type:'RangeSliderItem',text:'1'});
         }
         app.style.setProperty('--highlightColor', highlightColor);
         app.style.setProperty('--backgroundColor', backgroundColor);
@@ -109,6 +111,10 @@ import InputItem from './InputItem.svelte';
                 fontType = value;
                 app.style.setProperty('--fontType', fontType);
                 break;
+
+                case 'useAnimations':
+                useAnimations = value;    
+                break;
         }
     }
 
@@ -139,16 +145,15 @@ import InputItem from './InputItem.svelte';
             currentSelection = 0;
             return;
         }
-        
-       if(itemsContainer.children[currentSelection]) itemsContainer.children[currentSelection].classList.remove('selected');
+        if(itemsContainer.children[currentSelection]) itemsContainer.children[currentSelection].classList.remove('selected');
         currentSelection = sentIndex;
         itemsContainer.children[currentSelection].children[0].scrollIntoView({behavior: "smooth", block: "center"});
         itemsContainer.children[currentSelection].classList.add('selected');
 
-        description = items[sentIndex]._description; // set description of item on index change
+        description = items[sentIndex].description; // set description of item on index change
 
         //manage correct focus of input items
-        switch(items[sentIndex]._type){
+        switch(items[sentIndex].type){
             case 'InputItem':
             focusedInputItem = itemsContainer.children[currentSelection].children[1].children[0];
             //fixing cursos bug being on left side when focused.
@@ -171,7 +176,8 @@ import InputItem from './InputItem.svelte';
                     focusedInputItem = undefined;
                 }
             break;
-        }
+        }     
+       
 
     }
 
@@ -185,6 +191,7 @@ import InputItem from './InputItem.svelte';
         id="mainCont"
         class="absolute shadow-lg"
         style="left:{left}em;top:{top}em;width:{width}em;color:{fontColor};font-size:{fontSize}px;font-weight:{fontWeight};"
+        transition:fly={{ x: -200, duration: useAnimations ? 200 : 0}}
     >
         <div id="itemsMainCont" class="rounded-lg pb-1">
             <div class="flex">
@@ -198,18 +205,18 @@ import InputItem from './InputItem.svelte';
                 bind:this={itemsContainer}
             >
                 {#each items as item, i}
-                    {#if item._type == 'MenuItem'}
+                    {#if item.type == 'MenuItem'}
                         <MenuItem {...item} />
-                    {:else if item._type == 'CheckboxItem'}
+                    {:else if item.type == 'CheckboxItem'}
                         <CheckboxItem {...item} />
-                    {:else if item._type == 'RangeSliderItem'}
+                    {:else if item.type == 'RangeSliderItem'}
                         <RangeSliderItem {...item} />
-                    {:else if item._type == 'ConfirmItem'}
-                        <ConfirmItem _selected={currentSelection === i} {...item} />
-                    {:else if item._type == 'ListItem'}
+                    {:else if item.type == 'ConfirmItem'}
+                        <ConfirmItem selected={currentSelection === i} {...item} />
+                    {:else if item.type == 'ListItem'}
                         <ListItem {...item} />
-                    {:else if item._type == 'InputItem'}
-                        <InputItem {...item} _index={i} />
+                    {:else if item.type == 'InputItem'}
+                        <InputItem {...item} index={i} />
                     {/if}
                 {/each}
             </div>
@@ -224,7 +231,7 @@ import InputItem from './InputItem.svelte';
     :global(.selected) {
         background-color: var(--highlightColor);
     }
-    :global(._disabled) {
+    :global(.disabled) {
         filter: grayscale(1);
         opacity: 0.3;
     }

@@ -63,6 +63,7 @@ function subMenuConfiguration(){
     menu.addItem(new MenuFramework.InputItem('Background Color',9,'',MenuFramework.menuConfiguration.backgroundColor,'','',false,'backgroundColor'));
 
     menu.addItem(new MenuFramework.CheckboxItem('Sound',MenuFramework.menuConfiguration.sound,'Toggle the menu sounds that comes up, when pressing something.'));
+    menu.addItem(new MenuFramework.CheckboxItem('Animations',MenuFramework.menuConfiguration.useAnimations,'Toggle the menuOpen and menuClose animation'));
 
     menu.addItem(new MenuFramework.RangeSliderItem('Left',0,120,MenuFramework.menuConfiguration.left,'','',false,'left'));
     menu.addItem(new MenuFramework.RangeSliderItem('Top',0,120,MenuFramework.menuConfiguration.top,'','',false,'top'));
@@ -75,6 +76,9 @@ function subMenuConfiguration(){
         switch (item.text) {
             case 'Sound':
                 MenuFramework.menuConfiguration.sound = state;
+                break;
+            case 'Animations':
+                MenuFramework.menuConfiguration.useAnimations = state;
                 break;
         }
     });

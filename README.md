@@ -111,7 +111,7 @@ confirmationChange(item,confirmed) //called when confirmation item changes
 inputSubmit(item,newValue) //called when selecting an input item
 inputChange(item,newValue) //called when typing into an input item
 listChange(item,newIndex,oldIndex,newValue) //called when the list value changed (left arrow, right arrow)
-autoListChange(item,newIndex,newValue) //called when the auto list changes (left arrow, right arrow)
+autoListChange(item,newValue,newIndex) //called when the auto list changes (left arrow, right arrow)
 indexChange(item,newIndex) //called when the current selected item changes (arrow up, arrow down)
 ```
 
@@ -130,6 +130,8 @@ fontColor
 fontWeight
 fontType
 sound
+useAnimations
+reset() // reset everything to the default layout
 ```
 If you want to add more fonts to the menu, please check the `main.css` in `src/assets/css`
 

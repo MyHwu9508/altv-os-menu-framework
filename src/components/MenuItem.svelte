@@ -1,16 +1,16 @@
 <script>
-export let _text;
-export let _emoji = undefined;
-export let _disabled = false;
-export let _rightText = undefined;
+export let text;
+export let emoji = undefined;
+export let disabled = false;
+export let rightText = undefined;
 </script>
 
-<div class:_disabled class="flex pl-2 pr-2 pt-1 pb-1">
-    {#if _emoji}
-        <p id="emoji">{@html _emoji}&nbsp;|&nbsp;</p>
+<div class:disabled class="flex pl-2 pr-2 pt-1 pb-1">
+    {#if emoji}
+        <p id="emoji">{@html emoji}&nbsp;|&nbsp;</p>
     {/if}
-    <p id="content">{@html _text}</p>
-    {#if _rightText}
-        <p id="rightLabel" class="ml-auto mr-0">{@html _rightText}</p>
+    <p id="content">{@html text}</p>
+    {#if rightText}
+        <p id="rightLabel" class="ml-auto mr-0">{@html rightText}</p>
     {/if}
 </div>

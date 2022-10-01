@@ -1,18 +1,18 @@
 <script>
-    export let _text;
-    export let _emoji = undefined;
-    export let _disabled = false;
-    export let _currentSelection = 5;
-    export let _min = 0;
-    export let _max = 10;
+    export let text;
+    export let emoji = undefined;
+    export let disabled = false;
+    export let currentSelection = 5;
+    export let min = 0;
+    export let max = 10;
 </script>
 
-<div class:_disabled class="flex pl-2 pr-2 pt-1 pb-1 items-center">
-    {#if _emoji}
-        <p id="emoji">{@html _emoji}&nbsp;|&nbsp;</p>
+<div class:disabled class="flex pl-2 pr-2 pt-1 pb-1 items-center">
+    {#if emoji}
+        <p id="emoji">{@html emoji}&nbsp;|&nbsp;</p>
     {/if}
-    <p id="content">{@html _text}</p>
-    <input id="input" type="range" min={_min} max={_max} value={_currentSelection} class="ml-auto mr-1" />
+    <p id="content">{@html text}</p>
+    <input id="input" type="range" min={min} max={max} value={currentSelection} class="ml-auto mr-1" />
 </div>
 
 <style>

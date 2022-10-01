@@ -1,20 +1,21 @@
 <script>
-    export let _text;
-    export let _emoji = undefined;
-    export let _disabled = false;
-    export let _currentValue = '';
+    export let text;
+    export let emoji = undefined;
+    export let disabled = false;
+    export let currentValue = '';
 </script>
 
-<div class:_disabled class="flex pl-2 pr-2 pt-1 pb-1">
-    {#if _emoji}
-        <p id="emoji">{@html _emoji}&nbsp;|&nbsp;</p>
+<div class:disabled class="flex pl-2 pr-2 pt-1 pb-1">
+    {#if emoji}
+        <p id="emoji">{@html emoji}&nbsp;|&nbsp;</p>
     {/if}
-    <p id="content">{@html _text}</p>
+    <p id="content">{@html text}</p>
 
     <div class="ml-auto mr-1 flex flex-row">
         
         <div class="arrowLeft arrow"></div>
-        <p>{@html _currentValue}</p>
+        
+        <span>{@html currentValue}</span>
         <div class="arrowRight arrow"></div>
     </div>
 </div>

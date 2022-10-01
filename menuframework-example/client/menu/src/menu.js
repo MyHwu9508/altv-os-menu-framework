@@ -71,12 +71,17 @@ export class Menu {
             if(!justNavigatedBack)playSound('SELECT');
             this.menuOpen.emit(); //emit Open before we actually open the menu -> When changing items in MenuOpen they wont get sent to UI twice
             if(this.currentIndex >= this._items.length) this._currentIndex = 0;  //reset index when it became out of bounce
-            webView.emit('setMenuItems', []); //When opening large menus use this to pre-open the menu before the items are loaded to prevent confusion
+          //  webView.emit('setMenuItems', []); //When opening large menus use this to pre-open the menu before the items are loaded to prevent confusion
             webView.emit('setTitle', this._title);
             webView.emit('setVisible', true);
-            webView.emit('setMenuItems', this._items); //force refresh of items, using this instead of refreshItems(), because we set visible to true in the end to prevent currentIndex out of bounce in webView, when changing menus on menuOpen (Needs investigation!)
+            
+            const _populatedItemList = [];
+            for(let i=0;i<this._items.length;i++){
+                _populatedItemList.push(this._items[i].getWebviewObjects());
+            }
+            webView.emit('setMenuItems', _populatedItemList); //force refresh of items, using this instead of refreshItems(), because we set visible to true in the end to prevent currentIndex out of bounce in webView, when changing menus on menuOpen (Needs investigation!)
+            
             webView.emit('setIndex', this.currentIndex); //refresh current index when opening
-
             
             //enfore only one menu opened at a time / fired when a user hardcodes .visible = true
             if (this !== Menu.current && Menu.current.visible) {
@@ -124,7 +129,7 @@ export class Menu {
         }
         this.addItem(item);
         menu._parentMenu = this;
-        item._childMenu = menu._id;
+        item._childMenu = menu;
     }
 
 
@@ -133,7 +138,7 @@ export class Menu {
             alt.log('removing submenu');
         }
         if (item._childMenu) {
-            Menu.remove(Menu._allMenus[item._childMenu]);
+            Menu.remove(item._childMenu);
             this.removeItem(item);
         }
     }
@@ -141,7 +146,7 @@ export class Menu {
     addItem(item) {
         this._items.push(item);
         if (this.visible) {
-            webView.emit('addMenuItem', item);
+            webView.emit('addMenuItem', item.getWebviewObjects());
         }
     }
 
@@ -150,7 +155,6 @@ export class Menu {
     }
 
     removeItem(item,onlyCleanup = false) {
-
         if(!onlyCleanup){
             const index = this._items.indexOf(item);
             if (index == -1) {
@@ -162,16 +166,9 @@ export class Menu {
                 webView.emit('removeMenuItem', index);
             }
         }
-
-        //Cleanup list, when items gets removed
-        if (item instanceof ListItem) {
-            if (debug) alt.log('removing list ID: ' + item._valueListID);
-            MenuFrameworkItemList.removeList(item._valueListID);
-        }
         
         if(cleanSubmenus && item._childMenu){
-            const childMenu = Menu._allMenus[item._childMenu];
-            Menu.remove(childMenu);
+            Menu.remove(item._childMenu);
         }
         item = null;
 
@@ -215,7 +212,7 @@ export class Menu {
         if (this.visible) {
             const index = this._items.indexOf(item);
             if (index != -1) {
-                webView.emit('setMenuItem', this._items[index], index);
+                webView.emit('setMenuItem', this._items[index].getWebviewObjects(), index);
    //  MAYBE NOT NEEDED??? webView.emit('setIndex', this.currentIndex); //enforece index update -> refreshes description and input items
             } else {
                 alt.log('editing item, that is not in this menu?');
@@ -428,7 +425,7 @@ export class MenuItem {
 
         if (this._childMenu) {
             if (debug) alt.log('Opening child menu');
-            const childMenu = Menu._allMenus[this._childMenu];
+            const childMenu = this._childMenu;
             if (!childMenu) {
                 alt.log('Tried to open child menu, but its not in array!');
                 return false;
@@ -439,6 +436,17 @@ export class MenuItem {
             return false; // prevent sound playing twice
         }
         return true;
+    }
+
+    getWebviewObjects() {
+        return {
+            type: this.type,
+            text: this.text,
+            rightText: this.rightText,
+            emoji: this.emoji,
+            disabled: this.disabled,
+            description: this.description
+        };
     }
 }
 
@@ -469,10 +477,16 @@ export class CheckboxItem extends MenuItem {
         Menu.current.checkboxChange.emit(this, this.checked); //call Hook
         return true;
     }
+
+    getWebviewObjects() {
+        return {
+            ...super.getWebviewObjects(),
+            checked: this.checked
+        }
+    }
 }
 
 export class ConfirmItem extends MenuItem {
-
     _confirmed;
     _confirmDenyText;
     _confirmAcceptText;
@@ -513,6 +527,15 @@ export class ConfirmItem extends MenuItem {
         this.confirmed = false;
         return true;
     }
+
+    getWebviewObjects() {
+        return {
+            ...super.getWebviewObjects(),
+            confirmed: this.confirmed,
+            confirmDenyText: this._confirmDenyText,
+            confirmAcceptText: this._confirmAcceptText,
+        }
+    }
 }
 
 export class InputItem extends MenuItem {
@@ -544,7 +567,7 @@ export class InputItem extends MenuItem {
         this.requestRefresh();
     }
     get maxLength() {
-        return this.maxLength;
+        return this._maxLength;
     }
     set maxLength(value) {
         this._maxLength = value;
@@ -556,48 +579,26 @@ export class InputItem extends MenuItem {
         Menu.current.inputSubmit.emit(this, this.value);
         return true;
     }
-}
 
-export class MenuFrameworkItemList {
-    static _lists = [];
-    static _nextFreeID = 0;
-
-    _items;
-    _id;
-
-    constructor(values = []) {
-        this._id = MenuFrameworkItemList._nextFreeID;
-        this._items = values;
-        MenuFrameworkItemList._lists[MenuFrameworkItemList._nextFreeID] = this;
-        MenuFrameworkItemList._nextFreeID++; //each list has its own ID counting from 0 > we could somewhen reach max int and maybe there is never an automatic garbage collection?
-    }
-
-    get items() {
-        return this._items;
-    }
-    get id() {
-        return this._id;
-    }
-
-    getItem(index) {
-        return this._items[index];
-    }
-
-    static removeList(id) {
-        //ID = position in array
-        this._lists.splice(id, 1);
+    getWebviewObjects() {
+        return {
+            ...super.getWebviewObjects(),
+            value: this.value,
+            placeholder: this.placeholder,
+            maxLength: this.maxLength,
+        }
     }
 }
 
 export class ListItem extends MenuItem {
     _currentIndex;
     _currentValue;
-    _valueListID;
+    _values;
 
     constructor(text, values = [], initialIndex = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined) {
         if (values.length === 0) return alt.log('You cannot create a ListItem without a list!');
         super(text, description, emoji, disabled, data);
-        this._valueListID = new MenuFrameworkItemList(values).id; //create list with items > When sending item to webview we dont send all items > less lag maybe? > :)
+        this._values = values;
         this.selectedIndex = initialIndex;
         this._type = 'ListItem';
     }
@@ -612,16 +613,15 @@ export class ListItem extends MenuItem {
     }
 
     get values() {
-        return MenuFrameworkItemList._lists[this._valueListID].items;
+        return this._values;
     }
     set values(values) {
-        MenuFrameworkItemList.removeList(this._valueListID);
-        this._valueListID = new MenuFrameworkItemList(values).id;
+        this._values = values;
         if (this.selectedIndex > this.values.length) this.selectedIndex = 0; //fix index, when new list will be used with index out of range
         this.requestRefresh();
     }
     get currentValue() {
-        return MenuFrameworkItemList._lists[this._valueListID].getItem(this._currentIndex);
+        return this.values[this._currentIndex];
     }
     set currentValue(value){
         const index = this.values.indexOf(value);
@@ -652,15 +652,24 @@ export class ListItem extends MenuItem {
         if (!isAutoListItem) Menu.current.listChange.emit(this, this.selectedIndex, oldIndex, this.currentValue);
         return true;
     }
+
+    getWebviewObjects() {
+        return {
+            ...super.getWebviewObjects(),
+            currentValue: this._currentValue
+        }
+    }
+
+
 }
 
 export class AutoListItem extends ListItem {
     _min;
     _max;
 
-    constructor(text, min, max, initialIndex = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined) {
+    constructor(text, min, max, initialValue = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined) {
         const values = Array.from({ length: max - min + 1 }, (v, k) => k + min);
-        super(text, values, initialIndex, description, emoji, disabled, data);
+        super(text, values, values.indexOf(initialValue), description, emoji, disabled, data);
         this._min = min;
         this._max = max;
     }
@@ -676,22 +685,27 @@ export class AutoListItem extends ListItem {
     get max(){
         return this._max;
     }
-    set max(value){
+    set max(value) {
         const values = Array.from({ length: value - this.min + 1 }, (v, k) => k + this.min);
         this.values = values;
-        this._max = value;  
+        this._max = value;
     }
 
     moveLeft() {
         const res = super.moveLeft(true);
-        if(res) Menu.current.autoListChange.emit(this, this.selectedIndex, this.currentValue);
+        if(res) Menu.current.autoListChange.emit(this, this.currentValue,this.selectedIndex);
         return res;
     }
 
     moveRight() {
         const res = super.moveRight(true);
-        if(res) Menu.current.autoListChange.emit(this, this.selectedIndex, this.currentValue);
+        if(res) Menu.current.autoListChange.emit(this, this.currentValue,this.selectedIndex);
         return res;
+    }
+    getWebviewObjects() {
+        return {
+            ...super.getWebviewObjects()
+        }
     }
 }
 
@@ -753,6 +767,16 @@ export class RangeSliderItem extends MenuItem {
         return false;
     }
 
+    getWebviewObjects() {
+        return {
+            ...super.getWebviewObjects(),
+            currentSelection: this.currentSelection,
+            min: this.min,
+            max: this.max
+
+        }
+    }
+
 }
 
 export class MenuConfiguration {
@@ -763,10 +787,11 @@ export class MenuConfiguration {
     _fontSize = 20;
     _highlightColor = '#bf7595da';
     _backgroundColor = '#000000a6';
-    _fontColor = '#dfdfbb';
+    _fontColor = '#DDDAD2';
     _fontWeight = 500;
     _fontType = 'Rubik';
     _sound = true;
+    _useAnimations = true;
 
     get left() {
         return this._left;
@@ -854,6 +879,29 @@ export class MenuConfiguration {
     set sound(state){
         this._sound = state;
     }
+
+    get useAnimations(){
+        return this._useAnimations;
+    }
+    set useAnimations(value) {
+        this._useAnimations = value;
+        webView.emit('setConfig', 'useAnimations', value);
+    }
+
+    reset(){
+        this.left = 1;
+        this.top = 1;
+        this.height = 30;
+        this.width = 20;
+        this.fontSize = 20;
+        this.highlightColor = '#bf7595da';
+        this.backgroundColor = '#000000a6';
+        this.fontColor = '#DDDAD2';
+        this.fontWeight = 500;
+        this.fontType = 'Rubik';
+        this.sound = true;
+        this.useAnimations = true;
+    }
 }
 export const menuConfiguration = new MenuConfiguration();
 
@@ -920,8 +968,8 @@ function registerKeybinds() {
 
         if (keydownStart + 1000 < now) itemChangeSpeed = 70;
         if (keydownStart + 3000 < now) itemChangeSpeed = 50;
-        if (keydownStart + 5000 < now) itemChangeSpeed = 30;
-        if (keydownStart + 7000 < now) itemChangeSpeed = 100;
+        if (keydownStart + 5000 < now) itemChangeSpeed = 40;
+        if (keydownStart + 7000 < now) itemChangeSpeed = 30;
 
 
         if ((native.isControlPressed(0, 172) || native.isDisabledControlPressed(0, 172)) && lastNavigation + itemChangeSpeed < now) {

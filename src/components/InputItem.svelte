@@ -1,27 +1,27 @@
 <script>
-    export let _text;
-    export let _emoji = undefined;
-    export let _disabled = false;
-    export let _placeholder = '';
-    export let _maxLength = 10;
-    export let _value;
-    export let _index;
+    export let text;
+    export let emoji = undefined;
+    export let disabled = false;
+    export let placeholder = '';
+    export let maxLength = 10;
+    export let value;
+    export let index;
 
     function inputChanged(){
         if('alt' in window)
-        alt.emit('inputChanged',_index,_value);
+        alt.emit('inputChanged',index,value);
     }
 
 </script>
 
-<div class:_disabled class="flex pl-2 pr-2 pt-1 pb-1">
-    {#if _emoji}
-        <p id="emoji">{@html _emoji}&nbsp;|&nbsp;</p>
+<div class:disabled class="flex pl-2 pr-2 pt-1 pb-1">
+    {#if emoji}
+        <p id="emoji">{@html emoji}&nbsp;|&nbsp;</p>
     {/if}
-    <p id="content">{@html _text}</p>
+    <p id="content">{@html text}</p>
 
     <div class="ml-auto mr-1 flex flex-row">
-        <input bind:value={_value} on:input={inputChanged} on:submit|preventDefault maxlength={_maxLength} style="width:{_maxLength > 10 ? 10*15 : (_maxLength*15)+4}px;" type="text" id="input" placeholder={_placeholder} spellcheck='false'>
+        <input bind:value={value} on:input={inputChanged} on:submit|preventDefault maxlength={maxLength} style="width:{maxLength > 10 ? 10*15 : (maxLength*15)+4}px;" type="text" id="input" placeholder={placeholder} spellcheck='false'>
     </div>
 </div>
 
