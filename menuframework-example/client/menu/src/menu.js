@@ -8,8 +8,9 @@ const webView = new alt.WebView('http://resource/client/menu/src/html/index.html
 //For developers
 const cleanSubmenus = true; // When set to true it will try to delete all submenus and items attached to an item you are deleting. However this may break dynamic menus
 const resetMenuCurrent = false; //When set to true this will toggle to set Menu.current to undefined when no menu is open. When turning the Menu.current variable will be set to undefined when you close all menus and there is no one visible
+const blockInputOnMenuOpen = false; //Block any player input, while any menu is open. -> Prevents unexpected player interaction
 
-let lastNavigation = 0, keydownStart, disableGameControls,justNavigatedBack;
+let lastNavigation = 0, keydownStart,justNavigatedBack;
 
 webView.once('ready', () => {
 
@@ -30,22 +31,20 @@ webView.once('ready', () => {
 export class Menu {
     static current;
     static _allMenus = [];
-    static _nextFreeID = 0;
 
     _visible = false;
     _title;
     _items;
     _parentMenu;
     _currentIndex = 0;
-    _id;
+    _data;
 
-    constructor(title) {
+    constructor(title,data = undefined) {
         this._title = title;
         this._items = [];
+        this._data = data;
 
-        this._id = Menu._nextFreeID;
-        Menu._allMenus[Menu._nextFreeID] = this;
-        Menu._nextFreeID++;
+        Menu._allMenus.push(this);
 
         this.menuOpen = new EventHandler();
         this.menuClose = new EventHandler();
@@ -60,6 +59,13 @@ export class Menu {
         this.confirmationChange = new EventHandler();
         this.indexChange = new EventHandler();
     }
+    get data(){
+        return this._data;
+    }
+    set data(value){
+        this._data = value;
+    }
+    
     get visible() {
         return this._visible;
     }
@@ -80,7 +86,6 @@ export class Menu {
                 _populatedItemList.push(this._items[i].getWebviewObjects());
             }
             webView.emit('setMenuItems', _populatedItemList); //force refresh of items, using this instead of refreshItems(), because we set visible to true in the end to prevent currentIndex out of bounce in webView, when changing menus on menuOpen (Needs investigation!)
-            
             webView.emit('setIndex', this.currentIndex); //refresh current index when opening
             
             //enfore only one menu opened at a time / fired when a user hardcodes .visible = true
@@ -90,6 +95,7 @@ export class Menu {
             }
 
             Menu.current = this;
+            webView.focus();
         } else {
             playSound('Back');
             webView.emit('setVisible', false);
@@ -113,10 +119,6 @@ export class Menu {
     set currentIndex(value) {
         this._currentIndex = value;
         if (this.visible) webView.emit('setIndex', this._currentIndex);
-    }
-
-    get id() {
-        return this._id;
     }
 
     addSubmenu(menu, item) {
@@ -297,12 +299,9 @@ export class Menu {
 
         if (currentItem instanceof InputItem && !currentItem.disabled) {
             webView.focus();
-            disableGameControls = true;
             alt.Player.local.setMeta('MenuFramework::Action::IsTypingText',true);
         } else if (alt.Player.local.hasMeta('MenuFramework::Action::IsTypingText')) {
             alt.Player.local.deleteMeta('MenuFramework::Action::IsTypingText');
-            webView.unfocus();
-            disableGameControls = false;
         }
 
         this.indexChange.emit(this,this.currentIndex);
@@ -596,7 +595,6 @@ export class ListItem extends MenuItem {
     _values;
 
     constructor(text, values = [], initialIndex = 0, description = undefined, emoji = undefined, disabled = undefined, data = undefined) {
-        if (values.length === 0) return alt.log('You cannot create a ListItem without a list!');
         super(text, description, emoji, disabled, data);
         this._values = values;
         this.selectedIndex = initialIndex;
@@ -932,19 +930,19 @@ function registerKeybinds() {
         if (!menu || !menu.visible) return;
         if (alt.Player.local.hasMeta('MenuFramework::State::PreventInput')) return;
 
-        if (disableGameControls) {
+        if (alt.Player.local.hasMeta('MenuFramework::Action::IsTypingText') || blockInputOnMenuOpen) {
             native.disableAllControlActions(0); //for input items
         }
 
-        if (native.isControlJustPressed(0, 177)) {
+        if (native.isControlJustPressed(0, 177) || native.isDisabledControlJustPressed(0,177)) {
             //if (menu.goBack()) playSound('BACK');
-            menu.goBack()
+            menu.goBack();
             return;
         }
 
         if (menu._items?.length === 0) return;
 
-        if (native.isControlJustPressed(0, 201)) {
+        if (native.isControlJustPressed(0, 201)|| native.isDisabledControlJustPressed(0,201)) {
             if (menu.select()) playSound('SELECT');
             return;
         }

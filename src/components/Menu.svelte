@@ -120,6 +120,7 @@ import InputItem from './InputItem.svelte';
 
     function setMenuItem(sentItem,index){
         items[index] = sentItem;
+        setIndex(currentSelection); //refresh index in case something like description or type changed
     }
 
     function addMenuItem(item){
@@ -196,7 +197,7 @@ import InputItem from './InputItem.svelte';
         <div id="itemsMainCont" class="rounded-lg pb-1">
             <div class="flex">
                 <h1 id="title" class="text-center p-1 font-bold w-full mr-1 rounded-lg uppercase">{@html title}</h1>
-                <p id="indexer" class="ml-auto w-max font-bold p-1 rounded-lg">{currentSelection + 1}/{items.length}</p>
+                <p id="indexer" class="ml-auto w-max font-bold p-1 rounded-lg break-normal">{currentSelection + 1}/{items.length}</p>
             </div>
             <div
                 id="itemsCont"
