@@ -5,6 +5,7 @@
     export let currentSelection = 5;
     export let min = 0;
     export let max = 10;
+    export let selected = false; //used to ensure focused design pattern
 </script>
 
 <div class:disabled class="flex pl-2 pr-2 pt-1 pb-1 items-center">
@@ -12,7 +13,7 @@
         <p id="emoji">{@html emoji}&nbsp;|&nbsp;</p>
     {/if}
     <p id="content">{@html text}</p>
-    <input id="input" type="range" min={min} max={max} value={currentSelection} class="ml-auto mr-1" />
+    <input id="input" type="range" min={min} max={max} value={currentSelection} class:selected class="ml-auto mr-1" />
 </div>
 
 <style>
@@ -34,7 +35,7 @@
         background: var(--highlightColor);
         border: 1px solid var(--highlightColor);
     }
-    #input:focus::-webkit-slider-thumb {
+    #input.selected::-webkit-slider-thumb{
         background: #333333;
         border: 1px solid #333333;
     }

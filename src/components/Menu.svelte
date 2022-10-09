@@ -120,7 +120,7 @@ import InputItem from './InputItem.svelte';
 
     function setMenuItem(sentItem,index){
         items[index] = sentItem;
-        setIndex(currentSelection); //refresh index in case something like description or type changed
+            setIndex(currentSelection);
     }
 
     function addMenuItem(item){
@@ -166,13 +166,8 @@ import InputItem from './InputItem.svelte';
             focusedInputItem.focus();
             break;
 
-            case 'RangeSliderItem':
-            focusedInputItem = itemsContainer.children[currentSelection].children[1];
-            focusedInputItem.focus();
-            break;
-            
             default:
-                if(focusedInputItem){
+            if(focusedInputItem){
                     focusedInputItem.blur();
                     focusedInputItem = undefined;
                 }
@@ -211,7 +206,7 @@ import InputItem from './InputItem.svelte';
                     {:else if item.type == 'CheckboxItem'}
                         <CheckboxItem {...item} />
                     {:else if item.type == 'RangeSliderItem'}
-                        <RangeSliderItem {...item} />
+                        <RangeSliderItem selected={currentSelection === i} {...item} />
                     {:else if item.type == 'ConfirmItem'}
                         <ConfirmItem selected={currentSelection === i} {...item} />
                     {:else if item.type == 'ListItem'}
