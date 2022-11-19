@@ -89,7 +89,7 @@ export class Menu {
             webView.emit('setIndex', this.currentIndex); //refresh current index when opening
             
             //enfore only one menu opened at a time / fired when a user hardcodes .visible = true
-            if (this !== Menu.current && Menu.current.visible) {
+            if (this !== Menu.current && Menu.current?.visible) {
                 Menu.current._visible = false;
                 Menu.current.menuClose.emit(false);
             }
