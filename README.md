@@ -177,7 +177,7 @@ Example1 | Example2 | Example3
 
 ## Help
 In case you have any questions or concerns regarding this, feel free to contact me on Discord.
-**Kaniggel#7263**
+**Kaniggel#6969**
 Alternatively you can join my Discord and create a ticket: https://corrosive.eu/discord
 
 ## License
