@@ -146,35 +146,13 @@ import InputItem from './InputItem.svelte';
             currentSelection = 0;
             return;
         }
-        if(itemsContainer.children[currentSelection]) itemsContainer.children[currentSelection].classList.remove('selected');
+        if(itemsContainer.children[currentSelection]) {
+            itemsContainer.children[currentSelection].classList.remove('selected');
+        }
         currentSelection = sentIndex;
         itemsContainer.children[currentSelection].children[0].scrollIntoView({behavior: "smooth", block: "center"});
         itemsContainer.children[currentSelection].classList.add('selected');
-
         description = items[sentIndex].description; // set description of item on index change
-
-        //manage correct focus of input items
-        switch(items[sentIndex].type){
-            case 'InputItem':
-            focusedInputItem = itemsContainer.children[currentSelection].children[1].children[0];
-            //fixing cursos bug being on left side when focused.
-            const currentVal = itemsContainer.children[currentSelection].children[1].children[0].value;
-            itemsContainer.children[currentSelection].children[1].children[0].value = '';
-            setTimeout(() => {
-                itemsContainer.children[currentSelection].children[1].children[0].value = currentVal;
-            }, 0);
-            focusedInputItem.focus();
-            break;
-
-            default:
-            if(focusedInputItem){
-                    focusedInputItem.blur();
-                    focusedInputItem = undefined;
-                }
-            break;
-        }     
-       
-
     }
 
     function setVisible(state){
@@ -212,7 +190,7 @@ import InputItem from './InputItem.svelte';
                     {:else if item.type == 'ListItem'}
                         <ListItem {...item} />
                     {:else if item.type == 'InputItem'}
-                        <InputItem {...item} index={i} />
+                        <InputItem {...item} index={i} selected={currentSelection === i} />
                     {/if}
                 {/each}
             </div>
