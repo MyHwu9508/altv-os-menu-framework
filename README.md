@@ -35,7 +35,7 @@ Now start and join your server and `press M` to open the example resource.
 ### Menu creation
 Make sure you import the source file by adding following import to your file:
 ```js
-import * as MenuFramework from '/client/menu/src/menu';
+import * as MenuFramework from './src/menu';
 ```
 
 Create a menu by calling the **MenuFramework.Menu** constructor.

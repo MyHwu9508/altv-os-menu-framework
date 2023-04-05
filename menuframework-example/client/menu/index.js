@@ -1,5 +1,5 @@
 import * as alt from 'alt';
-import * as MenuFramework from '/client/menu/src/menu';
+import * as MenuFramework from './src/menu.js';
 
 alt.on('connectionComplete', () => {
     BuildMenu();
