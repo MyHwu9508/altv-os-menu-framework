@@ -9,6 +9,7 @@ const webView = new alt.WebView('http://resource/client/menu/src/html/index.html
 const cleanSubmenus = true; // When set to true it will try to delete all submenus and items attached to an item you are deleting. However this may break dynamic menus
 const resetMenuCurrent = false; //When set to true this will toggle to set Menu.current to undefined when no menu is open. When turning the Menu.current variable will be set to undefined when you close all menus and there is no one visible
 const blockInputOnMenuOpen = false; //Block any player input, while any menu is open. -> Prevents unexpected player interaction
+const preventESCOnMenuOpen = true; //When a menu is open and the player presses ESC on the keyboard, the pause menu wont open. Use this to prevent users get confused with menu navigation
 
 let lastNavigation = 0, keydownStart,justNavigatedBack;
 
@@ -96,6 +97,7 @@ export class Menu {
 
             Menu.current = this;
             webView.focus();
+            this.checkForInputItem(); //check if opened item is input item and set meta #tryfix
         } else {
             playSound('Back');
             webView.emit('setVisible', false);
@@ -297,14 +299,20 @@ export class Menu {
         const currentItem = this.currentItem;
         if (!currentItem) return false;
 
+        this.checkForInputItem();
+
+        this.indexChange.emit(this,this.currentIndex);
+    }
+
+    checkForInputItem() {
+        const currentItem = this.currentItem;
+        if(!currentItem)return;
         if (currentItem instanceof InputItem && !currentItem.disabled) {
             webView.focus();
             alt.Player.local.setMeta('MenuFramework::Action::IsTypingText',true);
         } else if (alt.Player.local.hasMeta('MenuFramework::Action::IsTypingText')) {
             alt.Player.local.deleteMeta('MenuFramework::Action::IsTypingText');
         }
-
-        this.indexChange.emit(this,this.currentIndex);
     }
 
     select() {
@@ -781,7 +789,7 @@ export class MenuConfiguration {
     _left = 1;
     _top = 1;
     _height = 30;
-    _width = 20;
+    _width = 30;
     _fontSize = 20;
     _highlightColor = '#bf7595da';
     _backgroundColor = '#000000a6';
@@ -890,7 +898,7 @@ export class MenuConfiguration {
         this.left = 1;
         this.top = 1;
         this.height = 30;
-        this.width = 20;
+        this.width = 30;
         this.fontSize = 20;
         this.highlightColor = '#bf7595da';
         this.backgroundColor = '#000000a6';
@@ -927,11 +935,17 @@ class EventHandler {
 function registerKeybinds() {
     alt.everyTick(() => {
         const menu = Menu.current;
+
         if (!menu || !menu.visible) return;
         if (alt.Player.local.hasMeta('MenuFramework::State::PreventInput')) return;
 
         if (alt.Player.local.hasMeta('MenuFramework::Action::IsTypingText') || blockInputOnMenuOpen) {
             native.disableAllControlActions(0); //for input items
+        }
+
+        if(preventESCOnMenuOpen){
+            native.disableControlAction(0,200,true);
+            native.disableControlAction(0,199,true);
         }
 
         if (native.isControlJustPressed(0, 177) || native.isDisabledControlJustPressed(0,177)) {
